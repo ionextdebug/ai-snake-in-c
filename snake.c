@@ -54,6 +54,29 @@ void init_snake()
 void increase_snake()
 {
     Snake *new = malloc(sizeof(Snake));
+
+    switch (tail->dir)
+    {
+    case SNAKE_UP:
+        new->x = tail->x;
+        new->y = tail->y + 1;
+        break;
+    case SNAKE_DOWN:
+        new->x = tail->x;
+        new->y = tail->y - 1;
+        break;
+    case SNAKE_LEFT:
+        new->x = tail->x + 1;
+        new->y = tail->y;
+        break;
+    case SNAKE_RIGHT:
+        new->x = tail->x - 1;
+        new->y = tail->y;
+        break;
+    default:
+        break;
+    }
+
     new->x = tail->x;
     new->y = tail->y - 1;
     new->dir = tail->dir;
@@ -71,6 +94,7 @@ void move_snake()
 
     int prev_x = head->x;
     int prev_y = head->y;
+    int prev_dir = head->dir;
 
     switch (head->dir)
     {
@@ -100,14 +124,38 @@ void move_snake()
 
         int save_x = track->x;
         int save_y = track->y;
+        int save_dir = track->dir;
 
         track->x = prev_x;
         track->y = prev_y;
+        track->dir = prev_dir;
         track = track->next;
 
         prev_x = save_x;
         prev_y = save_y;
+        prev_dir = save_dir;
     }
+
+    return;
+}
+
+void reset_snake()
+{
+
+    Snake *track = head;
+    Snake *temp;
+
+    while (track != NULL)
+    {
+        temp = track;
+        track = track->next;
+        free(temp);
+    }
+
+    init_snake();
+    increase_snake();
+    increase_snake();
+    increase_snake();
 
     return;
 }
@@ -177,12 +225,22 @@ void render_apple(SDL_Renderer *renderer, int x, int y)
     SDL_RenderFillRect(renderer, &apple);
 }
 
-void detected_apple()
+void detect_apple()
 {
     if (head->x == Apple.x && head->y == Apple.y)
     {
         gen_apple();
         increase_snake();
+    }
+
+    return;
+}
+
+void detect_crash()
+{
+    if (head->x < 0 || head->x > GRID_SIZE || head->y < 0 || head->y > GRID_SIZE)
+    {
+        reset_snake();
     }
 
     return;
@@ -269,14 +327,15 @@ int main(void)
         SDL_RenderClear(renderer);
 
         move_snake();
-        detected_apple();
+        detect_apple();
+        detect_crash();
         render_grid(renderer, grid_x, grid_y);
         render_snake(renderer, grid_x, grid_y);
         render_apple(renderer, grid_x, grid_y);
 
         SDL_SetRenderDrawColor(renderer, 0x11, 0x11, 0x11, 255);
         SDL_RenderPresent(renderer);
-        SDL_Delay(200);
+        SDL_Delay(100);
     }
 
     SDL_DestroyRenderer(renderer);
