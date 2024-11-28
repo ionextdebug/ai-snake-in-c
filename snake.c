@@ -3,7 +3,7 @@
 #define WINDOW_X 10
 #define WINDOW_Y -20
 #define WINDOW_WIDTH 1200
-#define WINDOW_HEIGHT 800
+#define WINDOW_HEIGHT 700
 #define GRID_SIZE 20
 #define GRID_DIM 600
 
@@ -37,6 +37,8 @@ int main(void)
     SDL_Renderer *renderer;
     SDL_Event event;
     bool quit = false;
+    int grid_x = (WINDOW_WIDTH / 2) - (GRID_DIM / 2);
+    int grid_y = (WINDOW_HEIGHT / 2) - (GRID_DIM / 2);
 
     if (SDL_INIT_VIDEO < 0)
     {
@@ -87,7 +89,7 @@ int main(void)
 
         SDL_RenderClear(renderer);
 
-        render_grid(renderer, 20, 20);
+        render_grid(renderer, grid_x, grid_y);
 
         SDL_SetRenderDrawColor(renderer, 0x11, 0x11, 0x11, 255);
         SDL_RenderPresent(renderer);
