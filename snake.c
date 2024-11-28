@@ -33,9 +33,9 @@ int main(void)
     if(!renderer){
         fprintf(stderr, "ERROR: renderer");
     }
-
-    SDL_RenderClear(renderer);
+    
     SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 255);
+    SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
 
     SDL_Delay(2000);
