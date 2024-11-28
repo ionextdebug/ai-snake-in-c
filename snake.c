@@ -58,6 +58,52 @@ void increase_snake()
     return;
 }
 
+void move_snake()
+{
+
+    int prev_x = head->x;
+    int prev_y = head->y;
+
+    switch (head->dir)
+    {
+    case SNAKE_UP:
+        head->y--;
+        break;
+    case SNAKE_DOWN:
+        head->y++;
+        break;
+    case SNAKE_LEFT:
+        head->x--;
+        break;
+    case SNAKE_RIGHT:
+        head->x++;
+        break;
+    }
+
+    Snake *track = head;
+
+    if (track->next != NULL)
+    {
+        track = track->next;
+    }
+
+    while (track != NULL)
+    {
+
+        int save_x = track->x;
+        int save_y = track->y;
+
+        track->x = prev_x;
+        track->y = prev_y;
+        track = track->next;
+
+        prev_x = save_x;
+        prev_y = save_y;
+    }
+
+    return;
+}
+
 void render_snake(SDL_Renderer *renderer, int x, int y)
 {
     int seg_size = GRID_DIM / GRID_SIZE;
@@ -159,6 +205,18 @@ int main(void)
                 case SDLK_ESCAPE:
                     quit = true;
                     break;
+                case SDLK_UP:
+                    head->dir = SNAKE_UP;
+                    break;
+                case SDLK_DOWN:
+                    head->dir = SNAKE_DOWN;
+                    break;
+                case SDLK_LEFT:
+                    head->dir = SNAKE_LEFT;
+                    break;
+                case SDLK_RIGHT:
+                    head->dir = SNAKE_RIGHT;
+                    break;
                 }
                 break;
             }
@@ -166,11 +224,13 @@ int main(void)
 
         SDL_RenderClear(renderer);
 
+        move_snake();
         render_grid(renderer, grid_x, grid_y);
         render_snake(renderer, grid_x, grid_y);
 
         SDL_SetRenderDrawColor(renderer, 0x11, 0x11, 0x11, 255);
         SDL_RenderPresent(renderer);
+        SDL_Delay(200);
     }
 
     SDL_DestroyRenderer(renderer);
