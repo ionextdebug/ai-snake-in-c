@@ -7,6 +7,14 @@
 #define GRID_SIZE 20
 #define GRID_DIM 600
 
+typedef struct
+{
+    int x;
+    int y;
+} apple;
+
+apple Apple;
+
 enum
 {
     SNAKE_UP,
@@ -150,11 +158,47 @@ void render_grid(SDL_Renderer *renderer, int x, int y)
     return;
 }
 
+void gen_apple()
+{
+    Apple.x = rand() % GRID_SIZE;
+    Apple.y = rand() % GRID_SIZE;
+}
+
+void render_apple(SDL_Renderer *renderer, int x, int y)
+{
+    int apple_size = GRID_DIM / GRID_SIZE;
+    SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 255);
+    SDL_Rect apple;
+    apple.w = apple_size;
+    apple.h = apple_size;
+    apple.x = x + Apple.x * apple_size;
+    apple.y = y + Apple.y * apple_size;
+
+    SDL_RenderFillRect(renderer, &apple);
+}
+
+void detected_apple()
+{
+    if (head->x == Apple.x && head->y == Apple.y)
+    {
+        gen_apple();
+        increase_snake();
+    }
+
+    return;
+}
+
 int main(void)
 {
 
+    srand(time(0));
+
     init_snake();
     increase_snake();
+    increase_snake();
+    increase_snake();
+
+    gen_apple();
 
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -225,8 +269,10 @@ int main(void)
         SDL_RenderClear(renderer);
 
         move_snake();
+        detected_apple();
         render_grid(renderer, grid_x, grid_y);
         render_snake(renderer, grid_x, grid_y);
+        render_apple(renderer, grid_x, grid_y);
 
         SDL_SetRenderDrawColor(renderer, 0x11, 0x11, 0x11, 255);
         SDL_RenderPresent(renderer);
