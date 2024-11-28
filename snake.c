@@ -89,7 +89,7 @@ int main(void)
 
         render_grid(renderer, 20, 20);
 
-        SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 255);
+        SDL_SetRenderDrawColor(renderer, 0x11, 0x11, 0x11, 255);
         SDL_RenderPresent(renderer);
     }
 
