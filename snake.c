@@ -7,6 +7,13 @@
 #define GRID_SIZE 20
 #define GRID_DIM 600
 
+enum
+{
+    TRY_FORWARD,
+    TRY_LEFT,
+    TRY_RIGHT,
+};
+
 typedef struct
 {
     int x;
@@ -281,6 +288,191 @@ void detect_crash()
     return;
 }
 
+void turn_left()
+{
+
+    switch (head->dir)
+    {
+    case SNAKE_UP:
+        head->dir = SNAKE_LEFT;
+        break;
+    case SNAKE_DOWN:
+        head->dir = SNAKE_RIGHT;
+        break;
+    case SNAKE_LEFT:
+        head->dir = SNAKE_DOWN;
+        break;
+    case SNAKE_RIGHT:
+        head->dir = SNAKE_UP;
+        break;
+    }
+
+    return;
+}
+
+void turn_right()
+{
+    switch (head->dir)
+    {
+    case SNAKE_UP:
+        head->dir = SNAKE_RIGHT;
+        break;
+    case SNAKE_DOWN:
+        head->dir = SNAKE_LEFT;
+        break;
+    case SNAKE_LEFT:
+        head->dir = SNAKE_UP;
+        break;
+    case SNAKE_RIGHT:
+        head->dir = SNAKE_DOWN;
+        break;
+    }
+
+    return;
+}
+
+int state(int try)
+{
+    int reward = 0;
+
+    int try_x = head->x;
+    int try_y = head->y;
+
+    switch (head->dir)
+    {
+    case SNAKE_UP:
+        switch (try)
+        {
+        case TRY_FORWARD:
+            try_y--;
+            break;
+        case TRY_LEFT:
+            try_x--;
+            break;
+        case TRY_RIGHT:
+            try_x++;
+            break;
+        }
+        break;
+    case SNAKE_DOWN:
+        switch (try)
+        {
+        case TRY_FORWARD:
+            try_y++;
+            break;
+        case TRY_LEFT:
+            try_y++;
+            break;
+        case TRY_RIGHT:
+            try_y--;
+            break;
+        }
+        break;
+    case SNAKE_LEFT:
+        switch (try)
+        {
+        case TRY_FORWARD:
+            try_x--;
+            break;
+        case TRY_LEFT:
+            try_y++;
+            break;
+        case TRY_RIGHT:
+            try_y--;
+            break;
+        }
+        break;
+    case SNAKE_RIGHT:
+        switch (try)
+        {
+        case TRY_FORWARD:
+            try_x++;
+            break;
+        case TRY_LEFT:
+            try_y--;
+            break;
+        case TRY_RIGHT:
+            try_y++;
+            break;
+        }
+        break;
+    }
+
+    if (try_x < 0 || try_x > GRID_SIZE - 1)
+    {
+        reward += -100;
+    }
+
+    if (try_y < 0 || try_y > GRID_SIZE - 1)
+    {
+        reward += -100;
+    }
+
+    if (try_x == Apple.x && try_y == Apple.y)
+    {
+        reward += 100;
+    }
+
+    int diff_x = abs(head->x - Apple.x);
+    int diff_y = abs(head->y - Apple.y);
+    int try_diff_x = abs(try_x - Apple.x);
+    int try_diff_y = abs(try_y - Apple.y);
+
+    if (try_diff_x < diff_x)
+    {
+        reward += 5;
+    }
+
+    if (try_diff_y < diff_y)
+    {
+        reward += 5;
+    }
+
+    Snake *track = head;
+
+    if (track->next != NULL)
+    {
+        track = track->next;
+    }
+
+    while (track != NULL)
+    {
+        if (try_x == track->x && try_y == track->y)
+        {
+            reward += -100;
+        }
+        track = track->next;
+    }
+
+    return reward;
+}
+
+void ai()
+{
+
+    int try_forward = state(TRY_FORWARD);
+    int try_left = state(TRY_LEFT);
+    int try_right = state(TRY_RIGHT);
+
+    if (try_forward >= try_left && try_forward >= try_right)
+    {
+        // continue forward
+    }
+    else
+    {
+        if (try_left > try_right)
+        {
+            turn_left();
+        }
+        else
+        {
+            turn_right();
+        }
+    }
+
+    return;
+}
+
 int main(void)
 {
 
@@ -367,6 +559,8 @@ int main(void)
         render_grid(renderer, grid_x, grid_y);
         render_snake(renderer, grid_x, grid_y);
         render_apple(renderer, grid_x, grid_y);
+
+        ai();
 
         SDL_SetRenderDrawColor(renderer, 0x11, 0x11, 0x11, 255);
         SDL_RenderPresent(renderer);
